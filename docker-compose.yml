@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  config-server:
+    build:
+      context: ./config-server
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    networks:
+      - food-net
+
+  discovery-server:
+    build:
+      context: ./discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - food-net
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    networks:
+      - food-net
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+networks:
+  food-net:
+
+volumes:
+  pgdata:
