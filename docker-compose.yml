@@ -56,8 +56,41 @@ services:
     volumes:
       - order-pgdata:/var/lib/postgresql/data
 
+  product-db:
+    image: postgres:15
+    container_name: product-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: productdb
+    ports:
+      - "5435:5432"
+    networks:
+      - food-net
+    volumes:
+      - product-pgdata:/var/lib/postgresql/data
+
+  product-service:
+    build:
+      context: ./product-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://product-db:5432/productdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_APPLICATION_NAME=product-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      - product-db
+      - discovery-server
+    networks:
+      - food-net
+
+
 networks:
   food-net:
 
 volumes:
   order-pgdata:
+  product-pgdata:
