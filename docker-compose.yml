@@ -87,7 +87,7 @@ services:
     networks:
       - food-net
 
-      
+
   cart-db:
     image: postgres:15
     container_name: cart-db
@@ -120,6 +120,70 @@ services:
       - food-net
 
 
+  payment-db:
+    image: postgres:15
+    container_name: payment-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: paymentdb
+    ports:
+      - "5437:5432"
+    networks:
+      - food-net
+    volumes:
+      - payment-pgdata:/var/lib/postgresql/data
+
+  payment-service:
+    build:
+      context: ./payment-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/paymentdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_APPLICATION_NAME=payment-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      - payment-db
+      - discovery-server
+    networks:
+      - food-net
+
+  inventory-db:
+    image: postgres:15
+    container_name: inventory-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: inventorydb
+    ports:
+      - "5438:5432"
+    networks:
+      - food-net
+    volumes:
+      - inventory-pgdata:/var/lib/postgresql/data
+
+  inventory-service:
+    build:
+      context: ./inventory-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://inventory-db:5432/inventorydb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_APPLICATION_NAME=inventory-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      - inventory-db
+      - discovery-server
+    networks:
+      - food-net
+
+
+
 networks:
   food-net:
 
@@ -127,3 +191,5 @@ volumes:
   order-pgdata:
   product-pgdata:
   cart-pgdata:
+  payment-pgdata:
+  inventory-pgdata:
