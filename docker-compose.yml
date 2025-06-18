@@ -19,22 +19,39 @@ services:
     networks:
       - food-net
 
-  postgres:
+  order-service:
+    build:
+      context: ./order-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://order-db:5432/orderdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=order-service
+    depends_on:
+      - discovery-server
+      - order-db
+    networks:
+      - food-net
+      
+  order-db:
     image: postgres:15
-    container_name: postgres
+    container_name: order-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: authdb
+      POSTGRES_DB: orderdb
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - food-net
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - order-pgdata:/var/lib/postgresql/data
 
 networks:
   food-net:
 
 volumes:
-  pgdata:
+  order-pgdata:
