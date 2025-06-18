@@ -1,10 +1,15 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: auth-service
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/authdb
+    url: jdbc:postgresql://auth-db:5432/authdb
     username: postgres
     password: password
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,10 +19,4 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+      defaultZone: http://discovery-server:8761/eureka/
