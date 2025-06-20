@@ -1,24 +1,5 @@
-server:
-  port: 8080
-
 spring:
   application:
-    name: api-gateway
-
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-      routes:
-        - id: order-service
-          uri: lb://order-service
-          predicates:
-            - Path=/orders/**
-        # future auth-service route can be added here
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://discovery-server:8761/eureka/
+    name: api-gateway  # Or cart-service, etc.
+  config:
+    import: optional:configserver:http://config-server:8888

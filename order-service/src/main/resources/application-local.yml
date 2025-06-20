@@ -1,0 +1,29 @@
+server:
+  port: 8082
+
+spring:
+  rabbitmq:
+    host: localhost  # or rabbitmq (if running via Docker Compose)
+    port: 5672
+    username: guest
+    password: guest
+    queue: order.queue
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orderdb
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+eureka:
+  client:
+    enabled: false  # optional, if you're skipping Eureka during dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
