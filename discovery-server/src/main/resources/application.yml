@@ -5,3 +5,8 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+logging:
+  file:
+    name: /logs/order-service.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

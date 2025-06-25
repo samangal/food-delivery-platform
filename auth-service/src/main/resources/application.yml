@@ -4,3 +4,8 @@ spring:
   config:
     import: optional:configserver:http://config-server:8888
 
+logging:
+  file:
+    name: /logs/auth-service.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
