@@ -5,9 +5,9 @@ spring:
   application:
     name: payment-service
   config:
-    import: "optional:classpath:/"    
+    import: "optional:classpath:/"
   rabbitmq:
-    host: rabbitmq # or rabbitmq (if running via Docker Compose)
+    host: localhost # or rabbitmq (if running via Docker Compose)
     port: 5672
     username: guest
     password: guest
@@ -26,7 +26,6 @@ eureka:
   client:
     service-url:
       defaultZone: http://discovery-server:8761/eureka/
-      
 logging:
   file:
     name: /logs/payment-service.log
@@ -45,4 +44,4 @@ rabbitmq:
   payment_failed:
     exchange: payment.exchange
     routing-key: payment.failed.processed.key
-    queue: payment.failed.queue
+    queue: payment.failed.queue    

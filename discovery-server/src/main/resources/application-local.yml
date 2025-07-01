@@ -1,16 +1,12 @@
 server:
-  port: 8082
+  port: 8761
 
-spring:
-  application:
-    name: order-service
-  config:
-    import: optional:configserver:http://config-server:8888
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
 logging:
   file:
     name: /logs/order-service.log
   pattern:
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
-
-  

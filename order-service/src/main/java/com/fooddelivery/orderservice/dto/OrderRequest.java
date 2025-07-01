@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 public class OrderRequest {
 	
-	private Long userId;
+	private String userId;
     private List<Long> productIds;
     private Double totalAmount;
 

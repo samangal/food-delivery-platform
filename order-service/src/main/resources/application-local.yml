@@ -2,14 +2,17 @@ server:
   port: 8082
 
 spring:
+  application:
+    name: order-service
+  config:
+    import: "optional:classpath:/"
   rabbitmq:
-    host: localhost  # or rabbitmq (if running via Docker Compose)
+    host: rabbitmq  # or rabbitmq (if running via Docker Compose)
     port: 5672
     username: guest
     password: guest
-    queue: order.queue
   datasource:
-    url: jdbc:postgresql://localhost:5432/orderdb
+    url: jdbc:postgresql://order-db:5432/orderdb
     username: postgres
     password: password
   jpa:
@@ -17,10 +20,15 @@ spring:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
+rabbitmq:
+  order:
+    queue: order.queue
+    exchange: order.exchange
+    routing-key: order.created.key
 eureka:
   client:
-    enabled: false  # optional, if you're skipping Eureka during dev
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka/  # optional, if you're skipping Eureka during dev
 springdoc:
   api-docs:
     enabled: true

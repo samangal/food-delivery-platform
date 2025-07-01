@@ -10,5 +10,6 @@ public interface OrderService {
 	OrderResponse placeOrder(OrderRequest request);
     OrderResponse getOrderById(Long id);
     List<OrderResponse> getAllOrders();
+	void cancelOrder(String orderId, String getreason);
 
 }

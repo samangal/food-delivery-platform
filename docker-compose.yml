@@ -1,26 +1,13 @@
 version: '3.8'
 
 services:
-  config-server:
-    build:
-      context: ./config-server
-    ports:
-      - "8888:8888"
-    environment:
-      - SPRING_PROFILES_ACTIVE=default
-      - SPRING_CLOUD_CONFIG_SERVER_GIT_URI=https://github.com/samangal/food-config-repo
-      - SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME=${GIT_USERNAME}
-      - SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=${GIT_PASSWORD}
-    networks:
-      - food-net
-    volumes:
-    - ./logs/order-service:/logs
-
   discovery-server:
     build:
       context: ./discovery-server
     ports:
       - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
     networks:
       - food-net
     volumes:
@@ -33,34 +20,17 @@ services:
       - "8080:8080"
     environment:
       - SPRING_APPLICATION_NAME=api-gateway
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=local
+      #- SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
     volumes:
     - ./logs/order-service:/logs
     depends_on:
       - discovery-server
-      - config-server
+      #- config-server
     networks:
       - food-net
-
-  notification-service:
-    build:
-      context: ./notification-service
-    ports:
-      - "8087:8087"
-    environment:
-      - SPRING_APPLICATION_NAME=notification-service
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-    volumes:
-    - ./logs/order-service:/logs
-    depends_on:
-      - discovery-server
-      - config-server
-      - kafka
-    networks:
-      - food-net
-
+  
   auth-db:
     image: postgres:15
     container_name: auth-db
@@ -81,17 +51,47 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/authdb
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/authdb 
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_APPLICATION_NAME=auth-service
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-    volumes:
-    - ./logs/order-service:/logs
     depends_on:
       - auth-db
       - discovery-server
-      - config-server
+    networks:
+      - food-net
+
+  cart-db:
+    image: postgres:15
+    container_name: cart-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cartdb
+    ports:
+      - "5436:5432"
+    networks:
+      - food-net 
+    volumes:
+      - cart-pgdata:/var/lib/postgresql/data
+
+  cart-service:
+    build:
+      context: ./cart-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://cart-db:5432/cartdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_APPLICATION_NAME=cart-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      - cart-db
+      - discovery-server
     networks:
       - food-net
  
@@ -114,9 +114,10 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
-      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
-      - SPRING_RETRY_MAX_ATTEMPTS=20
+      - SPRING_PROFILES_ACTIVE=local
+      #- SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      #- SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      #- SPRING_RETRY_MAX_ATTEMPTS=20
       - SPRING_RETRY_INITIAL_INTERVAL=3000
       - SPRING_DATASOURCE_URL=jdbc:postgresql://order-db:5432/orderdb
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -128,43 +129,93 @@ services:
     depends_on:
       - discovery-server
       - order-db
-      - config-server
+      #- config-server
     networks:
       - food-net
-
-
-  cart-db:
-    image: postgres:15
-    container_name: cart-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: cartdb
-    ports:
-      - "5436:5432"
-    networks:
-      - food-net
-    volumes:
-      - cart-pgdata:/var/lib/postgresql/data
-
-  cart-service:
+  notification-service:
     build:
-      context: ./cart-service
+      context: ./notification-service
     ports:
-      - "8084:8084"
+      - "8087:8087"
     environment:
-      - SPRING_APPLICATION_NAME=cart-service
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_APPLICATION_NAME=notification-service
+      #- SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
     volumes:
     - ./logs/order-service:/logs
     depends_on:
       - discovery-server
-      - config-server
-      - cart-db
+      #- config-server
+      - rabbitmq
     networks:
-      - food-net	  
+      - food-net
 
+  payment-db:
+    image: postgres:15
+    container_name: payment-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: paymentdb
+    ports:
+      - "5437:5432"
+    networks:
+      - food-net
+    volumes:
+      - payment-pgdata:/var/lib/postgresql/data
+
+  payment-service:
+    build:
+      context: ./payment-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/paymentdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_APPLICATION_NAME=payment-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      - payment-db
+      - discovery-server
+      - rabbitmq
+    networks:
+      - food-net
+
+  product-db:
+    image: postgres:15
+    container_name: product-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: productdb
+    ports:
+      - "5435:5432"
+    networks:
+      - food-net
+    volumes:
+      - product-pgdata:/var/lib/postgresql/data
+
+  product-service:
+    build:
+      context: ./product-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://product-db:5432/productdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_APPLICATION_NAME=product-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    depends_on:
+      - product-db
+      - discovery-server
+      - rabbitmq
+    networks:
+      - food-net
   inventory-db:
     image: postgres:15
     container_name: inventory-db
@@ -196,68 +247,6 @@ services:
     networks:
       - food-net
 
-  payment-db:
-    image: postgres:15
-    container_name: payment-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: paymentdb
-    ports:
-      - "5437:5432"
-    networks:
-      - food-net
-    volumes:
-      - payment-pgdata:/var/lib/postgresql/data
-
-  payment-service:
-    build:
-      context: ./payment-service
-    ports:
-      - "8085:8085"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/paymentdb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=password
-      - SPRING_APPLICATION_NAME=payment-service
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-    depends_on:
-      - payment-db
-      - discovery-server
-    networks:
-      - food-net
-
-  product-db:
-    image: postgres:15
-    container_name: product-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: productdb
-    ports:
-      - "5435:5432"
-    networks:
-      - food-net
-    volumes:
-      - product-pgdata:/var/lib/postgresql/data
-
-  product-service:
-    build:
-      context: ./product-service
-    ports:
-      - "8083:8083"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://product-db:5432/productdb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=password
-      - SPRING_APPLICATION_NAME=product-service
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-    depends_on:
-      - product-db
-      - discovery-server
-    networks:
-      - food-net
-      
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -278,7 +267,6 @@ services:
       - zookeeper
     networks:
       - food-net
-
   rabbitmq:
     image: rabbitmq:3-management
     ports:
@@ -339,7 +327,6 @@ services:
       - prometheus
     networks:
       - food-net
-
 networks:
   food-net:
 

@@ -23,12 +23,12 @@ public class OrderServiceImplTest {
     @Test
     void placeOrder_shouldReturnResponse() {
     	OrderRequest req = new OrderRequest();
-        req.setUserId(1L);
+        req.setUserId("samangal");
         req.setTotalAmount(100.0);
         
         Order mockOrder = Order.builder()
                 .id(1L)
-                .userId(1L)
+                .userId("samangal")
                 .totalAmount(100.0)
                 .status("PLACED")
                 .build();
@@ -43,7 +43,7 @@ public class OrderServiceImplTest {
 
     @Test
     void getOrderById_shouldReturnResponse() {
-        Order mockOrder = new Order(1L, 1L, 100.0, "PLACED");
+        Order mockOrder = new Order(1L, "samangal", 100.0, "PLACED");
         when(repo.findById(1L)).thenReturn(Optional.of(mockOrder));
 
         var res = service.getOrderById(1L);
