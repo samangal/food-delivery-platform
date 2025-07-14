@@ -31,3 +31,13 @@ jobs:
           -Dsonar.projectKey=cart-service \
           -Dsonar.host.url=http://localhost:9000 \
           -Dsonar.login=$SONAR_TOKEN
+
+    - name: Set up Kubeconfig (Docker Desktop context)
+      run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_CONTENT }}" > ~/.kube/config
+
+    - name: Deploy to Kubernetes
+      run: |
+          kubectl apply -f k8s/cart-service/deployment.yml
+          kubectl apply -f k8s/cart-service/service.yml
