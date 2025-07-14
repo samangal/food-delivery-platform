@@ -18,6 +18,10 @@ public class CartService {
     public CartItem addItem(CartItem item) {
         return cartItemRepository.save(item);
     }
+    
+    public List<CartItem> list() {
+        return cartItemRepository.findAll();
+    }
 
     public List<CartItem> getCartItems(String userId) {
         return cartItemRepository.findByUserId(userId);

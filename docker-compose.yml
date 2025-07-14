@@ -31,19 +31,7 @@ services:
     networks:
       - food-net
   
-  auth-db:
-    image: postgres:15
-    container_name: auth-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: authdb
-    ports:
-      - "5439:5432"
-    networks:
-      - food-net
-    volumes:
-      - auth-pgdata:/var/lib/postgresql/data
+
 
   auth-service:
     build:
@@ -63,19 +51,7 @@ services:
     networks:
       - food-net
 
-  cart-db:
-    image: postgres:15
-    container_name: cart-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: cartdb
-    ports:
-      - "5436:5432"
-    networks:
-      - food-net 
-    volumes:
-      - cart-pgdata:/var/lib/postgresql/data
+
 
   cart-service:
     build:
@@ -95,19 +71,7 @@ services:
     networks:
       - food-net
  
-  order-db:
-    image: postgres:15
-    container_name: order-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: orderdb
-    ports:
-      - "5433:5432"
-    networks:
-      - food-net
-    volumes:
-      - order-pgdata:/var/lib/postgresql/data
+
   order-service:
     build:
       context: ./order-service
@@ -132,6 +96,8 @@ services:
       #- config-server
     networks:
       - food-net
+
+
   notification-service:
     build:
       context: ./notification-service
@@ -151,19 +117,7 @@ services:
     networks:
       - food-net
 
-  payment-db:
-    image: postgres:15
-    container_name: payment-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: paymentdb
-    ports:
-      - "5437:5432"
-    networks:
-      - food-net
-    volumes:
-      - payment-pgdata:/var/lib/postgresql/data
+ 
 
   payment-service:
     build:
@@ -184,19 +138,7 @@ services:
     networks:
       - food-net
 
-  product-db:
-    image: postgres:15
-    container_name: product-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: productdb
-    ports:
-      - "5435:5432"
-    networks:
-      - food-net
-    volumes:
-      - product-pgdata:/var/lib/postgresql/data
+ 
 
   product-service:
     build:
@@ -216,19 +158,7 @@ services:
       - rabbitmq
     networks:
       - food-net
-  inventory-db:
-    image: postgres:15
-    container_name: inventory-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: inventorydb
-    ports:
-      - "5438:5432"
-    networks:
-      - food-net
-    volumes:
-      - inventory-pgdata:/var/lib/postgresql/data
+ 
 
   inventory-service:
     build:
