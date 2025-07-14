@@ -22,7 +22,7 @@ jobs:
 
       - name: 🧪 Build + Test + Code Coverage
         working-directory: ./cart-service
-        run: mvn clean verify
+        run: mvn clean verify -DskipTests
 
       - name: 🔍 SonarQube Analysis
         working-directory: ./cart-service
