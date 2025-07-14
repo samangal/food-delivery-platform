@@ -39,5 +39,13 @@ jobs:
 
     - name: Deploy to Kubernetes
       run: |
-          kubectl apply -f k8s/cart-service/deployment.yml
-          kubectl apply -f k8s/cart-service/service.yml
+          kubectl apply -f k8s/cart-service/deployment.yml --validate=true
+          kubectl apply -f k8s/cart-service/service.yml --validate=true
+          kubectl rollout status deployment/cart-deployment
+
+    - name: Mask Kubeconfig
+      run: echo "::add-mask::${{ secrets.KUBECONFIG_CONTENT }}"
+
+    - name: Cleanup Kubeconfig
+      if: always()
+      run: rm -f ~/.kube/config
