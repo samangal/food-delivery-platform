@@ -21,11 +21,14 @@ jobs:
           distribution: "temurin"
 
       - name: 🧪 Build + Test + Code Coverage
+        working-directory: ./cart-service
         run: mvn clean verify
 
       - name: 🔍 SonarQube Analysis
+        working-directory: ./cart-service
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
         run: |
           mvn sonar:sonar \
             -Dsonar.projectKey=cart-service \
