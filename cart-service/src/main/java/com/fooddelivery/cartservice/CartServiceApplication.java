@@ -16,7 +16,6 @@ public class CartServiceApplication {
 		ConfigurableApplicationContext context =  SpringApplication.run(CartServiceApplication.class, args);
 		CartService cartService = context.getBean(CartService.class);
 		
-		System.out.println("List ALL "+ cartService.list());
 	
 	}
 
