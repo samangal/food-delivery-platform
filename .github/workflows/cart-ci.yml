@@ -35,29 +35,11 @@ jobs:
             -Dsonar.host.url=https://0cce75e6e1d2.ngrok-free.app \
             -Dsonar.login=$SONAR_TOKEN
 
-      - name: Set up Kubeconfig (Docker Desktop context)
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG_CONTENT }}" > ~/.kube/config
-
-      - name: Deploy to Kubernetes
-        run: |
-          kubectl apply -f k8s/cart-service/deployment.yml --validate=true
-          kubectl apply -f k8s/cart-service/service.yml --validate=true
-          kubectl rollout status deployment/cart-deployment
-
-      - name: Mask Kubeconfig
-        run: echo "::add-mask::${{ secrets.KUBECONFIG_CONTENT }}"
-
-      - name: Cleanup Kubeconfig
-        if: always()
-        run: rm -f ~/.kube/config
-
       - name: 🐳 Docker Login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: 📦 Build Docker Image
-        run: docker build -t yourdockerhub/cart-service:latest .
+        run: docker build -t samangal/cart-service:latest .
 
       - name: 📤 Push Docker Image
-        run: docker push yourdockerhub/cart-service:latest
+        run: docker push samangal/cart-service:latest
